@@ -1,0 +1,25 @@
+﻿@model IEnumerable<Model.Author>
+
+@{
+    ViewData["Title"] = "Authors List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var author in Model)
+        {
+            <tr>
+                <td>@author.Id</td>
+                <td>@author.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>

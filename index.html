@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Authors</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input[type="text"] {
+            margin: 5px;
+        }
+
+        button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Authors</h1>
+    <table id="authorsTbl">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Add New Author</h3>
+    <input type="text" id="newAuthorName" placeholder="Author Name" />
+    <button onclick="addAuthor()">Add Author</button>
+
+    <script>
+        let apiBaseUrl = "https://localhost:7291/api/Music/";
+
+        loadAuthors();
+
+        function loadAuthors() {
+            fetch(`${apiBaseUrl}authors`)
+                .then(response => response.json())
+                .then(authors => {
+                    const tbody = document.querySelector("#authorsTbl tbody");
+                    tbody.innerHTML = '';
+                    authors.forEach(author => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${author.id}</td>
+                            <td>${author.name}</td>
+                            <td>
+                                <button onclick="deleteAuthor(${author.id})">Delete</button>
+                                <button onclick="updateAuthor(${author.id}, '${author.name}')">Update</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching authors:', error));
+        }
+
+        function addAuthor() {
+            const authorName = document.getElementById("newAuthorName").value.trim();
+            if (!authorName) {
+                alert("Author name cannot be empty");
+                return;
+            }
+
+            fetch(`${apiBaseUrl}author`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: authorName })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        loadAuthors();
+                        document.getElementById("newAuthorName").value = '';
+                    } else {
+                        alert("Error adding author");
+                    }
+                })
+                .catch(error => console.error('Error adding author:', error));
+        }
+
+        function deleteAuthor(id) {
+            if (!confirm('Are you sure you want to delete this author?')) return;
+
+            fetch(`${apiBaseUrl}author/${id}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        loadAuthors();
+                    } else {
+                        alert("Error deleting author");
+                    }
+                })
+                .catch(error => console.error('Error deleting author:', error));
+        }
+
+        function updateAuthor(id, currentName) {
+            const newName = prompt("Enter new author name:", currentName);
+            if (newName !== null && newName.trim() !== '') {
+                fetch(`${apiBaseUrl}author/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id, name: newName.trim() })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            loadAuthors();
+                        } else {
+                            alert("Error updating author");
+                        }
+                    })
+                    .catch(error => console.error('Error updating author:', error));
+            }
+        }
+    </script>
+
+
+</body>
+</html>
